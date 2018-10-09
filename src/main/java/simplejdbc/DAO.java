@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -110,7 +111,27 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	CustomerEntity findCustomer(int customerID) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+		String find = "SELECT * FROM CUSTOMER WHERE CUSTOMER_ID=?";
+                CustomerEntity ce=null;
+                try (   Connection connection = myDataSource.getConnection();
+			PreparedStatement stmt = connection.prepareStatement(find)
+                ) {
+                        // Définir la valeur du paramètre
+			stmt.setInt(1, customerID);
+                        ResultSet rs = stmt.executeQuery();
+                        if(rs.next()){
+                            String name = rs.getString("NAME");
+                            ce=new CustomerEntity(customerID, name, "");
+                        }
+			
+
+		}  catch (SQLException ex) {
+			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+			throw new DAOException(ex.getMessage());
+		}
+                
+                return ce;
+                
 	}
 
 	/**
@@ -121,7 +142,29 @@ public class DAO {
 	 * @throws DAOException
 	 */
 	List<CustomerEntity> customersInState(String state) throws DAOException {
-		throw new UnsupportedOperationException("Pas encore implémenté");
+		String find = "SELECT * FROM CUSTOMER WHERE STATE=?";
+                List<CustomerEntity> L = new ArrayList<CustomerEntity>();
+                try (   Connection connection = myDataSource.getConnection();
+			PreparedStatement stmt = connection.prepareStatement(find)
+                ) {
+                        // Définir la valeur du paramètre
+                        stmt.setString(1, state);
+                        ResultSet rs = stmt.executeQuery();
+                        while(rs.next()){
+                            String name = rs.getString("NAME");
+                            int id = rs.getInt("CUSTOMER_ID");
+
+                            CustomerEntity ce=new CustomerEntity(id, name, rs.getString("ADDRESSLINE1"));
+                            L.add(ce);
+                        }
+			
+
+		}  catch (SQLException ex) {
+			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+			throw new DAOException(ex.getMessage());
+		}
+                
+                return L;
 	}
 
 }
